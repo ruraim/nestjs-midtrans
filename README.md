@@ -105,6 +105,12 @@ You can refer to [Midtrans - Charge Transaction](https://docs.midtrans.com/refer
   console.log(result)
 ```
 
+## Check Transaction Status Example
+```typescript
+  const result = await this.midtransService.getStatus('ORDER-123')
+  console.log(result)
+```
+
 ## Support
 - [Midtrans Official Documentation](https://docs.midtrans.com/)
 
