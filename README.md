@@ -31,7 +31,8 @@ import { MidtransModule } from '@ruraim/nestjs-midtrans';
         clientKey: 'client-key',
         serverKey: 'server-key',
         merchantId: 'merchant-id',
-        sandbox: true, // default: false
+        sandbox: true, // default: false,
+        isGlobal: true // default: false, register module globally
       })
     ],
 })
@@ -48,7 +49,8 @@ import { MidtransModule } from '@ruraim/nestjs-midtrans';
           }),
           // using ConfigService from @nestjs/config to get .env value
           inject: [ConfigService],
-          imports: [ConfigModule]
+          imports: [ConfigModule],
+          isGlobal: true // default: false, register module globally
       })
     ],
 })
