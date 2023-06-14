@@ -1,73 +1,118 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
-
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
-
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
-
+# NestJS Midtrans
+<a href="https://www.npmjs.com/package/@ruraim/nestjs-midtrans" target="_blank"><img src="https://img.shields.io/npm/v/@ruraim/nestjs-midtrans.svg" alt="NPM Version" /></a>
+<a href="https://www.npmjs.com/package/@ruraim/nestjs-midtrans" target="_blank"><img src="https://img.shields.io/npm/l/@ruraim/nestjs-midtrans.svg" alt="Package License" /></a>
+<a href="https://www.npmjs.com/package/@ruraim/nestjs-midtrans" target="_blank"><img src="https://img.shields.io/npm/dm/@ruraim/nestjs-midtrans.svg" alt="NPM Downloads" /></a>
 ## Description
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+Midtrans SDK Wrapper for Nest JS
 
 ## Installation
+**Using NPM**
 
 ```bash
-$ yarn install
+$ npm i --save @ruraim/nestjs-midtrans
+```
+**Using Yarn**
+
+```bash
+$ yarn add @ruraim/nestjs-midtrans
 ```
 
-## Running the app
+## Module Import
 
-```bash
-# development
-$ yarn run start
+```typescript
+import { Module } from '@nestjs/common';
+import { MidtransModule } from '@ruraim/nestjs-midtrans';
 
-# watch mode
-$ yarn run start:dev
+// using register method
+@Module({
+  imports: [
+      MidtransModule.register({
+        clientKey: 'client-key',
+        serverKey: 'server-key',
+        merchantId: 'merchant-id',
+        sandbox: true, // default: false
+      })
+    ],
+})
 
-# production mode
-$ yarn run start:prod
+// using registerAsync with dependencies
+@Module({
+  imports: [
+      MidtransModule.registerAsync({
+          useFactory: (config: ConfigService) => ({
+              clientKey: config.get<string>('MIDTRANS_CLIENT_KEY'),
+              serverKey: config.get<string>('MIDTRANS_SERVER_KEY'),
+              merchantId: config.get<string>('MIDTRANS_MERCHANT_ID'),
+              sandbox: config.get<string>('MIDTRANS_MODE') === 'sandbox',
+          }),
+          // using ConfigService from @nestjs/config to get .env value
+          inject: [ConfigService],
+          imports: [ConfigModule]
+      })
+    ],
+})
+export class AppModule {}
 ```
 
-## Test
+## Inject Service
 
-```bash
-# unit tests
-$ yarn run test
+```typescript
 
-# e2e tests
-$ yarn run test:e2e
+import { MidtransService } from '@ruraim/nestjs-midtrans';
 
-# test coverage
-$ yarn run test:cov
+@Injectable()
+export class AppService {
+    constructor(
+        private readonly midtransService: MidtransService
+    ) {}
+}
+```
+
+## Charge Transaction Example
+You can refer to [Midtrans - Charge Transaction](https://docs.midtrans.com/reference/charge-transactions-1) for more information about the payload or see [Charge Schema](src/midtrans/dto/Charge.ts) file in the source code.
+
+```typescript
+  const result = await this.midtransService.charge({
+      payment_type: 'bank_transfer',
+      transaction_details: {
+          order_id: 'ORDER-123',
+          gross_amount: 200000
+      },
+      customer_details: {
+          email: 'customer@gmail.com',
+          first_name: 'John Doe',
+          phone: '081234567890'
+      },
+      item_details: [
+        {
+          id: 'Item1',
+          price: 100000,
+          quantity: 1,
+          name: 'Item 1'
+        },
+        {
+          id: 'Item2',
+          price: 50000,
+          quantity: 2,
+          name: 'Item 2'
+        }
+      ],
+      bank_transfer: {
+        bank: 'bca'
+      }
+  })
+  console.log(result)
 ```
 
 ## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+- [Midtrans Official Documentation](https://docs.midtrans.com/)
 
 ## Stay in touch
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+- [WhatsApp](https://wa.me/087748833087)
+- [Telegram](https://t.me/ruraim)
 
 ## License
 
-Nest is [MIT licensed](LICENSE).
+[MIT licensed](LICENSE).
