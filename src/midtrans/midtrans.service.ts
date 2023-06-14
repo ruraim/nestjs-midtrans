@@ -1,23 +1,25 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { Charge } from './midtrans.dto';
+import { Charge } from './dto/Charge';
 import axios, { AxiosInstance } from 'axios';
-import { MidtransConfig } from './midtrans.interface'
 import crypto from 'crypto';
+import { MidtransConfig } from './dto/Config';
+import { MODULE_OPTIONS_TOKEN } from './midtrans.module-definition';
 
 @Injectable()
 export class MidtransService {
     private httpClient: AxiosInstance
 
     constructor(
-        @Inject('MIDTRANS_CONFIG') private readonly config: MidtransConfig
+        @Inject(MODULE_OPTIONS_TOKEN) private readonly config: MidtransConfig
     ) {
         this.init(config)
     }
 
     init(config: MidtransConfig) {
         const authToken = Buffer.from(config.serverKey).toString('base64')
+        const baseUrl = config.sandbox ? 'https://api.sandbox.midtrans.com/v2' : 'https://api.midtrans.com/v2'
         this.httpClient = axios.create({
-            baseURL: config.baseUrl,
+            baseURL: baseUrl,
             headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
