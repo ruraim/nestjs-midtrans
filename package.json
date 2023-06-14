@@ -27,8 +27,10 @@
   },
   "dependencies": {
     "@nestjs/common": "^9.0.0",
+    "axios": "^1.4.0",
     "reflect-metadata": "^0.1.13",
-    "rxjs": "^7.2.0"
+    "rxjs": "^7.2.0",
+    "zod": "^3.21.4"
   },
   "devDependencies": {
     "@nestjs/cli": "^9.0.0",
