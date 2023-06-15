@@ -4,6 +4,7 @@ import axios, { AxiosInstance } from 'axios';
 import crypto from 'crypto';
 import { MidtransConfig } from './dto/Config';
 import { MODULE_OPTIONS_TOKEN } from './midtrans.module-definition';
+import { Subscription, SubscriptionUpdate } from './dto/subscription/Subscription';
 
 @Injectable()
 export class MidtransService {
@@ -17,7 +18,7 @@ export class MidtransService {
 
     init(config: MidtransConfig) {
         const authToken = Buffer.from(config.serverKey).toString('base64')
-        const baseUrl = config.sandbox ? 'https://api.sandbox.midtrans.com/v2' : 'https://api.midtrans.com/v2'
+        const baseUrl = config.sandbox ? 'https://api.sandbox.midtrans.com' : 'https://api.midtrans.com'
         this.httpClient = axios.create({
             baseURL: baseUrl,
             headers: {
@@ -30,9 +31,8 @@ export class MidtransService {
     }
 
     async charge(payload: Charge) {
-        if (!this.httpClient) throw new Error('Midtrans client not initialized')
         try {
-            const { data } = await this.httpClient.post('/charge', payload)
+            const { data } = await this.httpClient.post('/v2/charge', payload)
             return data
         } catch (error) {
             throw error.response.data
@@ -40,9 +40,8 @@ export class MidtransService {
     }
 
     async getStatus(orderId: string) {
-        if (!this.httpClient) throw new Error('Midtrans client not initialized')
         try {
-            const { data } = await this.httpClient.get(`/${orderId}/status`)
+            const { data } = await this.httpClient.get(`/v2/${orderId}/status`)
             return data
         } catch (error) {
             throw error.response.data
@@ -57,9 +56,8 @@ export class MidtransService {
     }
 
     async expireTransaction(orderId: string) {
-        if (!this.httpClient) throw new Error('Midtrans client not initialized')
         try {
-            const { data } = await this.httpClient.post(`/${orderId}/expire`)
+            const { data } = await this.httpClient.post(`/v2/${orderId}/expire`)
             return data
         } catch (error) {
             throw error.response.data
@@ -67,9 +65,8 @@ export class MidtransService {
     }
 
     async getCardToken(cardNumber: string, cardExpMonth: string, cardExpYear: string, cardCvv: string) {
-        if (!this.httpClient) throw new Error('Midtrans client not initialized')
         try {
-            const { data } = await this.httpClient.get('/token', {
+            const { data } = await this.httpClient.get('/v2/token', {
                 params: {
                     card_number: cardNumber,
                     card_exp_month: cardExpMonth,
@@ -84,4 +81,48 @@ export class MidtransService {
         }
     }
 
+    async createSubscription(payload: Subscription) {
+        try {
+            const { data } = await this.httpClient.post('/v1/subscriptions', payload)
+            return data
+        } catch (error) {
+            throw error.response.data
+        }
+    }
+
+    async getSubscription(subscriptionId: string) {
+        try {
+            const { data } = await this.httpClient.get(`/v1/subscriptions/${subscriptionId}`)
+            return data
+        } catch (error) {
+            throw error.response.data
+        }
+    }
+
+    async disableSubscription(subscriptionId: string) {
+        try {
+            const { data } = await this.httpClient.post(`/v1/subscriptions/${subscriptionId}/disable`)
+            return data
+        } catch (error) {
+            throw error.response.data
+        }
+    }
+
+    async enableSubscription(subscriptionId: string) {
+        try {
+            const { data } = await this.httpClient.post(`/v1/subscriptions/${subscriptionId}/enable`)
+            return data
+        } catch (error) {
+            throw error.response.data
+        }
+    }
+
+    async updateSubscription(subscriptionId: string, payload: SubscriptionUpdate) {
+        try {
+            const { data } = await this.httpClient.patch(`/v1/subscriptions/${subscriptionId}`, payload)
+            return data
+        } catch (error) {
+            throw error.response.data
+        }
+    }
 }
