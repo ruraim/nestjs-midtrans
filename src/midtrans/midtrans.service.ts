@@ -1,10 +1,11 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { Charge } from './dto/Charge';
-import axios, { AxiosInstance } from 'axios';
+import axios, { AxiosError, AxiosInstance } from 'axios';
 import crypto from 'crypto';
 import { MidtransConfig } from './dto/Config';
 import { MODULE_OPTIONS_TOKEN } from './midtrans.module-definition';
 import { Subscription, SubscriptionUpdate } from './dto/subscription/Subscription';
+import { MidtransError } from './midtrans.error';
 
 @Injectable()
 export class MidtransService {
@@ -86,7 +87,7 @@ export class MidtransService {
             const { data } = await this.httpClient.post('/v1/subscriptions', payload)
             return data
         } catch (error) {
-            throw error.response.data
+            throw new MidtransError('Midtrans Error', error.response?.data)
         }
     }
 
