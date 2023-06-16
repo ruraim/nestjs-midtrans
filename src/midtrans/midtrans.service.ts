@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { Charge } from './dto/Charge';
-import axios, { AxiosError, AxiosInstance } from 'axios';
+import axios, { AxiosError, AxiosInstance, AxiosRequestConfig } from 'axios';
 import crypto from 'crypto';
 import { MidtransConfig } from './dto/Config';
 import { MODULE_OPTIONS_TOKEN } from './midtrans.module-definition';
@@ -17,7 +17,7 @@ export class MidtransService {
         this.init(config)
     }
 
-    init(config: MidtransConfig) {
+    private init(config: MidtransConfig) {
         const authToken = Buffer.from(config.serverKey).toString('base64')
         const baseUrl = config.sandbox ? 'https://api.sandbox.midtrans.com' : 'https://api.midtrans.com'
         this.httpClient = axios.create({
@@ -31,22 +31,34 @@ export class MidtransService {
         })
     }
 
-    async charge(payload: Charge) {
+    private async handleRequest(
+        method: 'get' | 'post' | 'put' | 'patch' | 'delete',
+        path: string,
+        payload?: Record<string, any>,
+        config: AxiosRequestConfig = {}) {
         try {
-            const { data } = await this.httpClient.post('/v2/charge', payload)
+            const { data } = await this.httpClient.request({
+                method,
+                url: path,
+                data: payload,
+                ...config
+            })
             return data
         } catch (error) {
-            throw error.response.data
+            if (error instanceof AxiosError)
+                throw new MidtransError('Midtrans Error', error.response?.data)
+            throw error
         }
     }
 
+    async charge(payload: Charge) {
+        const data = await this.handleRequest('post', '/v2/charge', payload)
+        return data
+    }
+
     async getStatus(orderId: string) {
-        try {
-            const { data } = await this.httpClient.get(`/v2/${orderId}/status`)
-            return data
-        } catch (error) {
-            throw error.response.data
-        }
+        const data = await this.handleRequest('get', `/v2/${orderId}/status`)
+        return data
     }
 
     async validateSignature(signatureKey: string, data: { orderId: string, statusCode: string, grossAmount: string }) {
@@ -57,73 +69,45 @@ export class MidtransService {
     }
 
     async expireTransaction(orderId: string) {
-        try {
-            const { data } = await this.httpClient.post(`/v2/${orderId}/expire`)
-            return data
-        } catch (error) {
-            throw error.response.data
-        }
+        const data = await this.handleRequest('post', `/v2/${orderId}/expire`)
+        return data
     }
 
     async getCardToken(cardNumber: string, cardExpMonth: string, cardExpYear: string, cardCvv: string) {
-        try {
-            const { data } = await this.httpClient.get('/v2/token', {
-                params: {
-                    card_number: cardNumber,
-                    card_exp_month: cardExpMonth,
-                    card_exp_year: cardExpYear,
-                    card_cvv: cardCvv,
-                    client_key: this.config.clientKey
-                }
-            })
-            return data
-        } catch (error) {
-            throw error.response.data
-        }
+        const data = await this.handleRequest('get', '/v2/token', {
+            params: {
+                card_number: cardNumber,
+                card_exp_month: cardExpMonth,
+                card_exp_year: cardExpYear,
+                card_cvv: cardCvv,
+                client_key: this.config.clientKey
+            }
+        })
+        return data
     }
 
     async createSubscription(payload: Subscription) {
-        try {
-            const { data } = await this.httpClient.post('/v1/subscriptions', payload)
-            return data
-        } catch (error) {
-            throw new MidtransError('Midtrans Error', error.response?.data)
-        }
+        const data = await this.handleRequest('post', '/v1/subscriptions', payload)
+        return data
     }
 
     async getSubscription(subscriptionId: string) {
-        try {
-            const { data } = await this.httpClient.get(`/v1/subscriptions/${subscriptionId}`)
-            return data
-        } catch (error) {
-            throw error.response.data
-        }
+        const data = await this.handleRequest('get', `/v1/subscriptions/${subscriptionId}`)
+        return data
     }
 
     async disableSubscription(subscriptionId: string) {
-        try {
-            const { data } = await this.httpClient.post(`/v1/subscriptions/${subscriptionId}/disable`)
-            return data
-        } catch (error) {
-            throw error.response.data
-        }
+        const data = await this.handleRequest('post', `/v1/subscriptions/${subscriptionId}/disable`)
+        return data
     }
 
     async enableSubscription(subscriptionId: string) {
-        try {
-            const { data } = await this.httpClient.post(`/v1/subscriptions/${subscriptionId}/enable`)
-            return data
-        } catch (error) {
-            throw error.response.data
-        }
+        const data = await this.handleRequest('post', `/v1/subscriptions/${subscriptionId}/enable`)
+        return data
     }
 
     async updateSubscription(subscriptionId: string, payload: SubscriptionUpdate) {
-        try {
-            const { data } = await this.httpClient.patch(`/v1/subscriptions/${subscriptionId}`, payload)
-            return data
-        } catch (error) {
-            throw error.response.data
-        }
+        const data = await this.handleRequest('patch', `/v1/subscriptions/${subscriptionId}`, payload)
+        return data
     }
 }
