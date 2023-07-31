@@ -11,3 +11,5 @@ export const EChannelSchema = z.object({
     bill_info8: z.string().nullish(),
     bill_key: z.string()
 })
+
+export type EChannel = z.infer<typeof EChannelSchema>
