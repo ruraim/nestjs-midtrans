@@ -1,4 +1,5 @@
 export { MidtransModule } from './midtrans/midtrans.module'
 export { MidtransService } from './midtrans/midtrans.service'
+export { SnapService } from './midtrans/snap.service'
 export { MidtransError } from './midtrans/midtrans.error'
 export * from './midtrans/dto'

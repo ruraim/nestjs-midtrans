@@ -1,22 +1,22 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { Charge } from './dto/Charge';
-import axios, { AxiosError, AxiosInstance, AxiosRequestConfig } from 'axios';
+import axios from 'axios';
 import crypto from 'crypto';
 import { MidtransConfig } from './dto/Config';
 import { MODULE_OPTIONS_TOKEN } from './midtrans.module-definition';
 import { Subscription, SubscriptionUpdate } from './dto/subscription/Subscription';
-import { MidtransError } from './midtrans.error';
 import { Refund } from './dto/Refund';
 import { Capture } from './dto/Capture';
 import { GopayAccount } from './dto/GopayAccount';
+import { BaseService } from './base.service';
 
 @Injectable()
-export class MidtransService {
-    private httpClient: AxiosInstance
+export class MidtransService extends BaseService {
 
     constructor(
         @Inject(MODULE_OPTIONS_TOKEN) private readonly config: MidtransConfig
     ) {
+        super()
         this.init(config)
     }
 
@@ -32,26 +32,6 @@ export class MidtransService {
                 'X-Payment-Locale': 'en-EN'
             }
         })
-    }
-
-    private async handleRequest(
-        method: 'get' | 'post' | 'put' | 'patch' | 'delete',
-        path: string,
-        payload?: Record<string, any>,
-        config: AxiosRequestConfig = {}) {
-        try {
-            const { data } = await this.httpClient.request({
-                method,
-                url: path,
-                data: payload,
-                ...config
-            })
-            return data
-        } catch (error) {
-            if (error instanceof AxiosError)
-                throw new MidtransError('Midtrans Error', error.response?.data)
-            throw error
-        }
     }
 
     // Payment API
