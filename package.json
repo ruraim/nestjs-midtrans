@@ -1,6 +1,6 @@
 {
   "name": "@ruraim/nestjs-midtrans",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "NestJS Midtrans SDK Module",
   "author": "Russell Raimundo <raimundorussell@gmail.com>",
   "license": "MIT",

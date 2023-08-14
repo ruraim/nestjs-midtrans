@@ -3,6 +3,7 @@ import axios from "axios";
 import { MODULE_OPTIONS_TOKEN } from "./midtrans.module-definition";
 import { MidtransConfig, TransactionDetails } from "./dto";
 import { BaseService } from "./base.service";
+import { SnapTransaction } from "./dto/SnapTransaction";
 
 @Injectable()
 export class SnapService extends BaseService {
@@ -26,7 +27,7 @@ export class SnapService extends BaseService {
         })
     }
 
-    public async transaction(payload: { transaction_details: TransactionDetails }) {
+    public async transaction(payload: SnapTransaction) {
         const data = await this.handleRequest('post', `/v1/transactions`, payload)
         return data
     }
