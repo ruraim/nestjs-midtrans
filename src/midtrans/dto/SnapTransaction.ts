@@ -6,7 +6,7 @@ import { TransactionDetailsSchema } from './TransactionDetails'
 export const SnapTransactionSchema = z.intersection(
     z.object({
         transaction_details: TransactionDetailsSchema,
-        item_details: z.array(ItemDetailsSchema).nullish(),
+        item_details: ItemDetailsSchema.nullish(),
         customer_details: CustomerDetailsSchema.nullish(),
         enabled_payments: z.array(
             z.enum([
