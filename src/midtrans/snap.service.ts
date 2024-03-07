@@ -14,7 +14,7 @@ export class SnapService extends BaseService {
         this.init(config)
     }
 
-    private init(config: MidtransConfig) {
+    public init(config: MidtransConfig) {
         const authToken = Buffer.from(config.serverKey).toString('base64')
         const baseUrl = config.sandbox ? 'https://app.sandbox.midtrans.com/snap' : 'https://app.midtrans.com/snap'
         this.httpClient = axios.create({

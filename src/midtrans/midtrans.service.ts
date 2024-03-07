@@ -20,7 +20,7 @@ export class MidtransService extends BaseService {
         this.init(config)
     }
 
-    private init(config: MidtransConfig) {
+    public init(config: MidtransConfig) {
         const authToken = Buffer.from(config.serverKey).toString('base64')
         const baseUrl = config.sandbox ? 'https://api.sandbox.midtrans.com' : 'https://api.midtrans.com'
         this.httpClient = axios.create({
